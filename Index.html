@@ -1,0 +1,708 @@
+Notícia da Semana
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Notícia da Semana (V24)</title>
+    <style>
+        :root { 
+            --primary: #2c3e50; 
+            --econ: #2980b9; 
+            --comm: #27ae60; 
+            --bg: #f4f7f6; 
+            --accent: #e67e22; 
+            --warn: #f39c12; 
+            --danger: #e74c3c; 
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); padding: 20px; color: #333; margin: 0; }
+        
+        .container { background: white; max-width: 950px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: var(--primary); border-bottom: 4px solid var(--econ); padding-bottom: 15px; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* POPUP DE ENTRADA */
+        .startup-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.98); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .startup-box {
+            background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .startup-box h2 { color: var(--econ); margin-top: 0; }
+        .startup-box select { margin: 20px 0; font-size: 1.1rem; padding: 12px; width: 100%; border: 1px solid #bdc3c7; border-radius: 6px; }
+        .btn-enter { background: var(--econ); width: 100%; font-size: 1.1rem; padding: 14px; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer; }
+        .btn-enter:hover { background: #1f6692; }
+
+        .sync-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; margin-top: 10px; display: inline-block; font-weight: bold; }
+        .sync-ok { background: #d4edda; color: #155724; }
+        .sync-loading { background: #fff3cd; color: #856404; }
+
+        /* HEADER GRID */
+        .header-box { background: #eef2f5; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #dce4ec; }
+        .grid-row { display: grid; gap: 15px; margin-bottom: 15px; }
+        .cols-2 { grid-template-columns: 1fr 1fr; }
+        .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .cols-4 { grid-template-columns: 1fr 1fr 2fr 1fr; }
+        
+        .context-box { background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+
+        label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #7f8c8d; display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 5px; font-size: 0.95rem; box-sizing: border-box; transition: 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--econ); outline: none; box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1); }
+        input:disabled, select:disabled { background: #eee; color: #777; cursor: not-allowed; }
+
+        .divider { border-top: 1px solid #bdc3c7; margin: 25px 0 15px 0; position: relative; }
+        .divider-label { position: absolute; top: -10px; left: 10px; background: #eef2f5; padding: 0 10px; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; }
+
+        /* RUBRICAS */
+        .section-title { padding: 12px 20px; color: white; font-weight: bold; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; margin-top: 30px; align-items: center; }
+        .bg-e { background: var(--econ); }
+        .bg-c { background: var(--comm); }
+        .rubric-box { border: 1px solid #ddd; border-top: none; padding: 15px 20px; background: #fff; border-radius: 0 0 6px 6px; }
+
+        .criteria-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; border-bottom: 1px dashed #eee; padding-bottom: 12px; }
+        .criteria-row:last-child { border-bottom: none; margin-bottom: 0; }
+        .criteria-info { width: 38%; padding-right: 10px; }
+        .c-title { font-weight: bold; color: var(--primary); font-size: 0.95rem; display: block; }
+        .c-desc { font-size: 0.8rem; color: #555; display: block; margin-top: 3px; line-height: 1.25; }
+
+        .slider-container { flex-grow: 1; padding: 0 20px; position: relative; }
+        input[type=range] { width: 100%; cursor: pointer; height: 8px; background: #ddd; border-radius: 5px; appearance: none; position: relative; z-index: 2; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        .range-labels { position: relative; height: 20px; margin-top: 8px; font-size: 0.7rem; color: #95a5a6; font-weight: 600; text-transform: uppercase; }
+        .lbl-pos { position: absolute; transform: translateX(-50%); top: 0; }
+        .p-25 { left: 25%; color: var(--danger); } 
+        .p-50 { left: 50%; color: var(--warn); } 
+        .p-75 { left: 75%; color: var(--econ); } 
+        .p-100 { left: 100%; transform: translateX(-100%); color: var(--comm); } 
+
+        .score-display { 
+            width: 75px; text-align: center; font-weight: bold; 
+            background: #fff; border: 2px solid #bdc3c7; color: var(--primary);
+            padding: 8px; border-radius: 6px; font-size: 1rem; transition: all 0.2s ease;
+        }
+
+        /* AREA PROFESSOR */
+        .teacher-area { border: 2px solid var(--accent); background: #fffbf7; padding: 25px; margin-bottom: 30px; border-radius: 8px; display: none; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.1); }
+        .teacher-header { color: #d35400; font-weight: bold; cursor: pointer; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; }
+        .db-box { background: #ffe0b2; padding: 15px; border-radius: 6px; border: 1px dashed #f57c00; margin-bottom: 20px; }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 6px; font-weight: bold; color: white; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; font-size: 1rem; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-save { background: #27ae60; } 
+        .btn-save:disabled { background: #95a5a6; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-lock { background: #95a5a6; flex: 0 0 auto; padding: 5px 15px; font-size: 0.8rem; margin-bottom: 10px; float: right; display: none; }
+        .btn-db { background: #d35400; padding: 10px 15px; width: auto; font-size: 0.9rem; margin-top: 10px; }
+        .btn-clear { background: var(--danger); padding: 10px 15px; width: auto; font-size: 0.9rem; margin-top: 10px; margin-left: 5px; }
+
+        .moodle-alert {
+            background-color: #e8f4f8; color: #11557c; border: 1px solid #b6d4fe;
+            padding: 15px; border-radius: 6px; margin-top: 25px;
+            text-align: center; display: flex; align-items: center; justify-content: center; gap: 15px;
+        }
+        .moodle-icon { font-size: 1.8rem; }
+        
+        @media (max-width: 768px) {
+            .grid-row { grid-template-columns: 1fr; }
+            .criteria-row { flex-direction: column; align-items: flex-start; }
+            .criteria-info, .slider-container { width: 100%; padding: 0; margin-bottom: 10px; }
+            .score-display { align-self: flex-end; width: 75px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="startupModal" class="startup-modal">
+    <div class="startup-box">
+        <h2>👋 Bem-vindo!</h2>
+        <p>Para começar, indica a tua turma:</p>
+        
+        <select id="startTurmaSelect">
+            <option value="">-- Selecionar Turma --</option>
+            <option value="10C">Turma 10C</option>
+            <option value="11C">Turma 11C</option>
+            <option value="12C">Turma 12C</option>
+            <option value="" disabled>────────────────</option>
+            <option value="PROF">👨‍🏫 Sou Professor</option>
+        </select>
+
+        <button class="btn-enter" onclick="enterApp()">Entrar na Aplicação</button>
+        <div id="syncStatus" class="sync-badge sync-loading">⏳ A sincronizar turmas da nuvem...</div>
+    </div>
+</div>
+
+<div class="container">
+    
+    <button id="btnTeacherArea" class="btn-lock" onclick="unlockTeacher()">🔒 Área Professor (DB Alunos)</button>
+    <div style="clear:both"></div>
+
+    <div id="teacherZone" class="teacher-area">
+        <div class="teacher-header" onclick="toggleTeacher()">
+            <span>⚙️ ÁREA DO PROFESSOR</span> <small>❌ Fechar</small>
+        </div>
+
+        <div class="db-box">
+            <h3 style="margin-top:0; color:#e65100;">👥 GESTÃO LOCAL DE EMERGÊNCIA</h3>
+            <p style="font-size:0.9rem; margin-bottom:10px;">
+                As turmas são lidas automaticamente da aba <b>"Alunos"</b> no Google Sheets.<br>
+                Esta área permite editar a cópia local do dispositivo se estiver sem internet.
+            </p>
+            <div class="grid-row cols-2">
+                <div>
+                    <label>Editar Turma:</label>
+                    <select id="db_turma_select" onchange="loadDBToTextarea()">
+                        <option value="10C">10C</option>
+                        <option value="11C">11C</option>
+                        <option value="12C">12C</option>
+                    </select>
+                </div>
+                <div></div>
+            </div>
+            <textarea id="db_textarea" rows="5" placeholder="Exem: 1 Ana Silva"></textarea>
+            <button class="btn-db" onclick="saveDB()">💾 Gravar Localmente</button>
+            <button class="btn-clear" onclick="purgeAndReloadCache()">🧹 Limpar Cache e Forçar Atualização</button>
+            <span id="db_status" style="margin-left:10px; font-weight:bold; color:green;"></span>
+        </div>
+    </div>
+
+    <h1>Notícia da Semana</h1>
+    
+    <div class="header-box">
+        <div class="context-box">
+            <div class="grid-row cols-3" style="margin-bottom:0;">
+                <div>
+                    <label style="color:#e67e22;">📅 Ano Letivo</label>
+                    <select id="ano_letivo" style="font-weight:bold; color:#d35400;">
+                        <option value="2023/2024">2023/2024</option>
+                        <option value="2024/2025">2024/2025</option>
+                        <option value="2025/2026">2025/2026</option>
+                        <option value="2026/2027" selected>2026/2027</option>
+                        <option value="2027/2028">2027/2028</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="color:#e67e22;">📅 Semestre</label>
+                    <select id="semestre" style="font-weight:bold; color:#d35400;">
+                        <option value="S1" selected>1º Semestre</option>
+                        <option value="S2">2º Semestre</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="color:#e67e22;">📊 Escala de Classificação</label>
+                    <select id="escala_max" style="font-weight:bold; color:#d35400;" onchange="updateScale()">
+                        <option value="200" selected>Escala 0 - 200</option>
+                        <option value="20">Escala 0 - 20</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"><span class="divider-label">QUEM ESTÁ A AVALIAR?</span></div>
+        <div class="grid-row cols-3">
+            <div>
+                <label>O teu Nº (Avaliador)</label>
+                <input type="number" id="av_num" placeholder="O teu nº">
+            </div>
+            <div>
+                <label>Tu és...</label>
+                <select id="av_tipo" onchange="renderRubrics()">
+                    <option value="Aluno">Aluno (Par)</option>
+                    <option value="Auto">O Próprio (Autoavaliação)</option>
+                    <option value="Professor">Professor</option>
+                </select>
+            </div>
+            <div>
+                <label>Turma</label>
+                <select id="turma" onchange="resetTargetName()">
+                    <option value="10C">10C</option>
+                    <option value="11C">11C</option>
+                    <option value="12C">12C</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="divider"><span class="divider-label">QUEM APRESENTOU?</span></div>
+        
+        <div class="grid-row cols-4">
+            <div>
+                <label style="color:#2980b9;">DIGITA O Nº</label>
+                <input type="number" id="target_num" placeholder="Nº..." style="border: 2px solid #2980b9; font-weight:bold;" oninput="autoFillName()">
+            </div>
+            <div style="grid-column: span 3;">
+                <label>Nome do Colega (Automático)</label>
+                <input type="text" id="target_nome" placeholder="Aparece aqui o nome..." readonly style="background-color: #f9f9f9; color:#555;">
+            </div>
+        </div>
+        <div class="grid-row">
+            <div>
+                <label>Título da Notícia</label>
+                <input type="text" id="news_title" placeholder="Ex: Inflação e Taxas de Juro no BCE...">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title bg-e">
+        <span>📘 Conteúdo e Análise Económica</span>
+        <span id="totalE">Média: 0.0 / 200</span>
+    </div>
+    <div class="rubric-box" id="containerE"></div>
+
+    <div class="section-title bg-c">
+        <span>🎤 Comunicação e Apresentação</span>
+        <span id="totalC">Média: 0.0 / 200</span>
+    </div>
+    <div class="rubric-box" id="containerC"></div>
+
+    <div style="margin-top:20px;">
+        <label>Comentário / Feedback Construtivo (Opcional)</label>
+        <textarea id="obs" rows="3" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; font-family:inherit;" placeholder="Destaque os pontos fortes e sugestões específicas de melhoria..."></textarea>
+    </div>
+
+    <div class="moodle-alert">
+        <div class="moodle-icon">☁️</div>
+        <div style="text-align:left;">
+            <strong>Envio Direto para a Nuvem:</strong><br>
+            Clica em "Enviar Avaliação". Os dados serão submetidos automaticamente para a base de dados central.
+        </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-save" onclick="handleAction()">🚀 Enviar Avaliação para a Nuvem</button>
+    </div>
+
+</div>
+
+<script>
+    const WEB_APP_URL ="https://script.google.com/macros/s/AKfycbxPv92gHZPxf-fWieii42lChbkU1Iio4QVLJmLJQmyRuPCr8lrECSMOSsyIX5Fa4X61/exec";
+    const PROF_PASS = "RaLau"; // Palavra-passe direta
+    const DB_KEY = "NOTICIA_SEMANA_DB";
+
+    // Variável para guardar o perfil de entrada selecionado na modal inicial ("ALUNO" ou "PROF")
+    let userRoleType = "ALUNO";
+
+    const rubricasData = {
+        Hetero: {
+            econ: [
+                {t: "1. Enquadramento Teórico & Matéria", d: "Articula a notícia diretamente com os conteúdos curriculares e conceitos teóricos lecionados."},
+                {t: "2. Análise de Factos & Dados", d: "Distingue objetivamente factos de opiniões, interpretando dados ou indicadores apresentados com exatidão."},
+                {t: "3. Problematização & Solução", d: "Formula uma questão-problema clara e rigorosa e propõe uma resolução analítica bem fundamentada."},
+                {t: "4. Pensamento Crítico", d: "Demonstra autonomia de raciocínio, ponderando diferentes perspetivas, causas e impactos socioeconómicos."},
+                {t: "5. Rigor Terminológico", d: "Utiliza com precisão e correção a terminologia técnica da disciplina, evitando vocabulário informal."}
+            ],
+            comm: [
+                {t: "1. Estrutura & Gestão do Tempo", d: "Apresentação com encadeamento lógico (introdução, desenvolvimento, conclusão) no tempo estipulado."},
+                {t: "2. Domínio & Autonomia", d: "Demonstra segurança no tema sem leitura extensiva de suporte, esclarecendo dúvidas com clareza."},
+                {t: "3. Expressão Oral & Postura", d: "Tom audível, dicção percetível, contacto visual constante com a turma e postura adequada."},
+                {t: "4. Qualidade dos Recursos Visuais", d: "Suportes (slides/esquemas) sintéticos, apelativos, sem excesso de texto e diretamente relevantes."},
+                {t: "5. Dinamização & Interação", d: "Capta o interesse do auditório, incentivando a participação ativa e debate com a turma."}
+            ]
+        },
+        Auto: {
+            econ: [
+                {t: "1. Enquadramento Teórico & Matéria", d: "Articulo a notícia diretamente com os conteúdos curriculares e conceitos teóricos lecionados."},
+                {t: "2. Análise de Factos & Dados", d: "Distingo objetivamente factos de opiniões, interpretando dados ou indicadores apresentados com exatidão."},
+                {t: "3. Problematização & Solução", d: "Formulo uma questão-problema clara e rigorosa e proponho uma resolução analítica bem fundamentada."},
+                {t: "4. Pensamento Crítico", d: "Demonstro autonomia de raciocínio, ponderando diferentes perspetivas, causas e impactos socioeconómicos."},
+                {t: "5. Rigor Terminológico", d: "Utilizo com precisão e correção a terminologia técnica da disciplina, evitando vocabulário informal."}
+            ],
+            comm: [
+                {t: "1. Estrutura & Gestão do Tempo", d: "Apresento o trabalho com encadeamento lógico (introdução, desenvolvimento, conclusão) no tempo estipulado."},
+                {t: "2. Domínio & Autonomia", d: "Demonstro segurança no tema sem leitura extensiva de suporte, esclarecendo dúvidas com clareza."},
+                {t: "3. Expressão Oral & Postura", d: "Mantenho tom audível, dicção percetível, contacto visual constante com a turma e postura adequada."},
+                {t: "4. Qualidade dos Recursos Visuais", d: "Elaboro suportes (slides/esquemas) sintéticos, apelativos, sem excesso de texto e diretamente relevantes."},
+                {t: "5. Dinamização & Interação", d: "Capto o interesse do auditório, incentivando a participação ativa e debate com a turma."}
+            ]
+        }
+    };
+
+    function getDB() {
+        const localStr = localStorage.getItem(DB_KEY);
+        return localStr ? JSON.parse(localStr) : {};
+    }
+
+    function purgeAndReloadCache() {
+        localStorage.removeItem(DB_KEY);
+        alert("🧹 Memória local limpa! A carregar novos dados da nuvem...");
+        syncFromCloud(true);
+    }
+
+    function syncFromCloud(userManual = false) {
+        const statusElem = document.getElementById('syncStatus');
+        if(statusElem) {
+            statusElem.className = "sync-badge sync-loading";
+            statusElem.innerText = "⏳ A sincronizar turmas da nuvem...";
+        }
+
+        const cacheBusterUrl = WEB_APP_URL + (WEB_APP_URL.includes('?') ? '&' : '?') + '_t=' + Date.now();
+
+        fetch(cacheBusterUrl)
+            .then(res => res.json())
+            .then(data => {
+                if(data && Object.keys(data).length > 0) {
+                    localStorage.removeItem(DB_KEY);
+                    localStorage.setItem(DB_KEY, JSON.stringify(data));
+                    
+                    if(statusElem) {
+                        statusElem.className = "sync-badge sync-ok";
+                        statusElem.innerText = "✅ Turmas sincronizadas da nuvem";
+                    }
+                    if(userManual) alert("✅ Turmas atualizadas com sucesso a partir do Google Sheets!");
+                }
+            })
+            .catch(err => {
+                console.warn("Falha na sincronização online. A usar cópia local:", err);
+                if(statusElem) {
+                    statusElem.className = "sync-badge sync-ok";
+                    statusElem.innerText = "📁 A usar turmas em cache local";
+                }
+            });
+    }
+
+    function saveDB() {
+        const turma = document.getElementById('db_turma_select').value;
+        const txt = document.getElementById('db_textarea').value;
+        const db = getDB();
+
+        const lines = txt.split('\n');
+        const classObj = {};
+        let count = 0;
+
+        lines.forEach(line => {
+            line = line.trim();
+            if(!line) return;
+            const match = line.match(/^(\d+)[\.\-\s]+(.+)$/);
+            if(match) {
+                classObj[parseInt(match[1])] = match[2].trim();
+                count++;
+            }
+        });
+
+        db[turma] = classObj;
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        
+        const status = document.getElementById('db_status');
+        status.innerText = `✅ Guardado localmente! (${count} alunos)`;
+        setTimeout(() => status.innerText = "", 3000);
+
+        if(document.getElementById('turma').value === turma) resetTargetName();
+    }
+
+    function loadDBToTextarea() {
+        const turma = document.getElementById('db_turma_select').value;
+        const db = getDB();
+        const area = document.getElementById('db_textarea');
+        if(db[turma]) {
+            let txt = "";
+            Object.keys(db[turma]).sort((a,b)=>a-b).forEach(n => {
+                txt += `${n} ${db[turma][n]}\n`;
+            });
+            area.value = txt;
+        } else {
+            area.value = "";
+        }
+    }
+
+    function autoFillName() {
+        const numInput = document.getElementById('target_num');
+        const nomeInput = document.getElementById('target_nome');
+        const turma = document.getElementById('turma').value;
+        const db = getDB();
+        const num = parseInt(numInput.value);
+
+        if(db[turma] && db[turma][num]) {
+            nomeInput.value = db[turma][num];
+            nomeInput.style.backgroundColor = "#e8f5e9";
+        } else {
+            nomeInput.value = "";
+            nomeInput.style.backgroundColor = "#f9f9f9";
+        }
+    }
+
+    function resetTargetName() {
+        document.getElementById('target_num').value = "";
+        document.getElementById('target_nome').value = "";
+        document.getElementById('target_nome').style.backgroundColor = "#f9f9f9";
+    }
+
+    function enterApp() {
+        const selectModal = document.getElementById('startTurmaSelect');
+        const selectedOption = selectModal.options[selectModal.selectedIndex];
+        const val = selectedOption ? selectedOption.value : "";
+
+        if(!val || val.trim() === "") { 
+            alert('⚠️ Por favor, selecione uma turma da lista antes de entrar.'); 
+            return; 
+        }
+
+        const mainSelectTurma = document.getElementById('turma');
+        const selectTipo = document.getElementById('av_tipo');
+        const btnTeacher = document.getElementById('btnTeacherArea');
+        const inputAvNum = document.getElementById('av_num');
+
+        if(val === 'PROF') {
+            const pass = prompt('Senha de Professor:');
+            if(pass === PROF_PASS) {
+                userRoleType = "PROF";
+                mainSelectTurma.disabled = false;
+                document.getElementById('startupModal').style.display = 'none';
+                selectTipo.value = "Professor";
+                inputAvNum.value = "0";
+                inputAvNum.disabled = true; 
+                btnTeacher.style.display = 'block'; 
+                loadDBToTextarea();
+            } else if(pass !== null) { 
+                alert('❌ Senha incorreta.'); 
+                return;
+            }
+        } else {
+            userRoleType = "ALUNO";
+            let exists = Array.from(mainSelectTurma.options).some(opt => opt.value === val);
+            if(!exists) {
+                let newOpt = document.createElement("option");
+                newOpt.value = val;
+                newOpt.innerText = val;
+                mainSelectTurma.appendChild(newOpt);
+            }
+
+            mainSelectTurma.value = val;
+            mainSelectTurma.disabled = true;
+            document.getElementById('startupModal').style.display = 'none';
+
+            for (let i = 0; i < selectTipo.options.length; i++) {
+                if (selectTipo.options[i].value === 'Professor') {
+                    selectTipo.remove(i);
+                    break;
+                }
+            }
+            selectTipo.value = "Aluno";
+            btnTeacher.style.display = 'none';
+        }
+        
+        renderRubrics();
+    }
+
+    function renderRubrics() {
+        const maxVal = parseInt(document.getElementById('escala_max').value);
+        const avTipo = document.getElementById('av_tipo').value;
+        
+        // Se na caixa inicial foi escolhida uma turma (userRoleType === "ALUNO"), adapta para a 1ª pessoa (Auto)
+        // Se foi escolhido Professor (userRoleType === "PROF"), mantém o formato padrão (Hetero - 3ª pessoa)
+        let modo = 'Hetero';
+        if (userRoleType === 'ALUNO') {
+            modo = 'Auto';
+        } else if (avTipo === 'Auto') {
+            modo = 'Auto';
+        }
+
+        const rubricas = rubricasData[modo];
+
+        ['econ', 'comm'].forEach(type => {
+            let html = '';
+            let prefix = type === 'econ' ? 'e' : 'c';
+            rubricas[type].forEach((item, i) => {
+                const currentVal = document.getElementById(`val_${prefix}${i}`) ? document.getElementById(`val_${prefix}${i}`).value : 0;
+
+                html += `
+                <div class="criteria-row">
+                    <div class="criteria-info">
+                        <span class="c-title">${item.t}</span>
+                        <span class="c-desc">${item.d}</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="${prefix}${i}" min="0" max="${maxVal}" step="1" value="${currentVal}" oninput="updateFromSlider('${prefix}', ${i})">
+                        <div class="range-labels">
+                            <span class="lbl-pos p-25">Fraco</span>
+                            <span class="lbl-pos p-50">Suficiente</span>
+                            <span class="lbl-pos p-75">Bom</span>
+                            <span class="lbl-pos p-100">Excelente</span>
+                        </div>
+                    </div>
+                    <input type="number" id="val_${prefix}${i}" class="score-display" value="${currentVal}" min="0" max="${maxVal}" oninput="updateFromInput('${prefix}', ${i})">
+                </div>`;
+            });
+            document.getElementById(type === 'econ' ? 'containerE' : 'containerC').innerHTML = html;
+        });
+        calc();
+    }
+
+    function updateScale() {
+        const maxVal = parseInt(document.getElementById('escala_max').value);
+        ['econ', 'comm'].forEach(type => {
+            let prefix = type === 'econ' ? 'e' : 'c';
+            for(let i = 0; i < 5; i++) {
+                const slider = document.getElementById(prefix + i);
+                const input = document.getElementById('val_' + prefix + i);
+                if(slider && input) {
+                    slider.max = maxVal;
+                    input.max = maxVal;
+                    if(parseInt(slider.value) > maxVal) slider.value = maxVal;
+                    if(parseInt(input.value) > maxVal) input.value = maxVal;
+                }
+            }
+        });
+        calc();
+    }
+
+    function updateFromSlider(prefix, i) {
+        document.getElementById('val_' + prefix + i).value = document.getElementById(prefix + i).value;
+        calc();
+    }
+    
+    function updateFromInput(prefix, i) {
+        const maxVal = parseInt(document.getElementById('escala_max').value);
+        let val = parseInt(document.getElementById('val_' + prefix + i).value);
+        if (val > maxVal) val = maxVal; if (val < 0) val = 0; if (isNaN(val)) val = 0;
+        document.getElementById('val_' + prefix + i).value = val;
+        document.getElementById(prefix + i).value = val;
+        calc();
+    }
+    
+    function updateScoreBadgeColor(inputElem, value, maxVal) {
+        const ratio = value / maxVal;
+        if(ratio < 0.5) {
+            inputElem.style.borderColor = "var(--danger)";
+            inputElem.style.color = "var(--danger)";
+        } else if(ratio < 0.7) {
+            inputElem.style.borderColor = "var(--warn)";
+            inputElem.style.color = "var(--warn)";
+        } else if(ratio < 0.9) {
+            inputElem.style.borderColor = "var(--econ)";
+            inputElem.style.color = "var(--econ)";
+        } else {
+            inputElem.style.borderColor = "var(--comm)";
+            inputElem.style.color = "var(--comm)";
+        }
+    }
+
+    function calc() {
+        const maxVal = parseInt(document.getElementById('escala_max').value);
+        let sumE = 0, sumC = 0;
+
+        for(let i = 0; i < 5; i++) { 
+            const inputE = document.getElementById(`val_e${i}`);
+            if(inputE) {
+                const val = parseInt(inputE.value) || 0;
+                sumE += val;
+                updateScoreBadgeColor(inputE, val, maxVal);
+            }
+            const inputC = document.getElementById(`val_c${i}`);
+            if(inputC) {
+                const val = parseInt(inputC.value) || 0;
+                sumC += val;
+                updateScoreBadgeColor(inputC, val, maxVal);
+            }
+        }
+        
+        let avgE = sumE / 5;
+        let avgC = sumC / 5;
+
+        document.getElementById('totalE').innerText = "Média: " + avgE.toFixed(1) + " / " + maxVal;
+        document.getElementById('totalC').innerText = "Média: " + avgC.toFixed(1) + " / " + maxVal;
+        
+        return { tE: avgE, tC: avgC };
+    }
+
+    function getData() {
+        let avNum = document.getElementById('av_num').value.trim();
+        let avTipo = document.getElementById('av_tipo').value;
+        let tNum = document.getElementById('target_num').value.trim();
+        let tNome = document.getElementById('target_nome').value.trim();
+        let newsTitle = document.getElementById('news_title').value.trim();
+        
+        if(!avNum && avTipo !== "Professor") {
+            alert("⚠️ Introduza o seu Número de Aluno (Avaliador)."); return null;
+        }
+        if(!tNum) { alert("⚠️ Digite o número do colega que apresentou."); return null; }
+        if(!tNome) { alert("⚠️ Nome do aluno não encontrado para o número inserido."); return null; }
+
+        if(avTipo === "Aluno" && avNum === tNum) {
+            alert("⚠️ Selecionou 'Aluno (Par)', mas inseriu o seu próprio número no campo de quem apresentou.");
+            return null;
+        }
+
+        let scores = calc(); 
+        return {
+            id: Date.now(),
+            meta: {
+                ano: document.getElementById('ano_letivo').value,
+                semestre: document.getElementById('semestre').value,
+                escala: document.getElementById('escala_max').value
+            },
+            avaliador: { num: avNum || "0", tipo: avTipo },
+            avaliado: { 
+                num: tNum, nome: tNome, 
+                turma: document.getElementById('turma').value,
+                noticia: newsTitle || "Sem título"
+            },
+            notas: { econ: scores.tE, comm: scores.tC }, 
+            obs: document.getElementById('obs').value
+        };
+    }
+
+    function handleAction() {
+        let data = getData();
+        if(!data) return;
+
+        const btnSave = document.querySelector('.btn-save');
+        const textoOriginal = btnSave.innerText;
+        btnSave.innerText = "⏳ A enviar para a nuvem...";
+        btnSave.disabled = true;
+
+        const formData = new URLSearchParams();
+        formData.append("payload", JSON.stringify(data));
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: formData
+        })
+        .then(() => {
+            alert("✅ Avaliação enviada com sucesso!");
+            btnSave.innerText = textoOriginal;
+            btnSave.disabled = false;
+            
+            document.getElementById('target_num').value = '';
+            document.getElementById('target_nome').value = '';
+            document.getElementById('target_nome').style.backgroundColor = '#f9f9f9';
+            document.getElementById('news_title').value = '';
+            document.getElementById('obs').value = '';
+            
+            ['econ','comm'].forEach(type => {
+                const prefix = (type === 'econ') ? 'e' : 'c';
+                for (let i = 0; i < 5; i++) {
+                    document.getElementById(prefix + i).value = 0;
+                    document.getElementById('val_' + prefix + i).value = 0;
+                }
+            });
+            calc();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        })
+        .catch(error => {
+            alert("❌ Ocorreu um erro na ligação ao enviar a avaliação.");
+            btnSave.innerText = textoOriginal;
+            btnSave.disabled = false;
+            console.error("Erro no envio:", error);
+        });
+    }
+
+    function unlockTeacher() {
+        const pass = prompt("Senha de Professor:");
+        if(pass === PROF_PASS) {
+            document.getElementById('teacherZone').style.display = 'block';
+            loadDBToTextarea();
+        } else if(pass !== null) {
+            alert("❌ Senha incorreta.");
+        }
+    }
+    
+    function toggleTeacher() { document.getElementById('teacherZone').style.display = 'none'; }
+    
+    // Inicialização
+    renderRubrics();
+    syncFromCloud();
+</script>
+</body>
+</html>
